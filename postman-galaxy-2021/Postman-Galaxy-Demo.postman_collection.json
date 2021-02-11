@@ -1,0 +1,198 @@
+{
+	"info": {
+		"_postman_id": "e6071d81-5e5b-462e-b78c-c08523d3176e",
+		"name": "Postman Galaxy Demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01 - Shared Secrets",
+			"item": [
+				{
+					"name": "echo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "{{x-api-key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"key\": \"value\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{url}}",
+							"protocol": "https",
+							"host": [
+								"{{url}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Secrets in Cookies",
+			"item": [
+				{
+					"name": "echo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const cookieJar = pm.cookies.jar();",
+									"const cookieName = \"xApiKey\"",
+									"const domain = \"postman.galaxy.demo\"",
+									"cookieJar.get(domain, cookieName, (error, cookie) => {",
+									"  if (error) {",
+									"    console.error(error);",
+									"    pm.variables.set(cookieName, \"error\");",
+									"  }",
+									"  if (cookie) {",
+									"    pm.variables.set(cookieName, cookie);",
+									"  } else {",
+									"    console.error(\"Cookie is missing\")",
+									"    pm.variables.set(cookieName, \"missing\");",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.variables.unset(\"xApiKey\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"type": "text",
+								"value": "{{xApiKey}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"key\": \"value\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{url}}",
+							"protocol": "https",
+							"host": [
+								"{{url}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Cookies with CryptoJS",
+			"item": [
+				{
+					"name": "echo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// https://postman-quick-reference-guide.readthedocs.io/en/latest/libraries.html",
+									"const cookieJar = pm.cookies.jar();",
+									"const sessionVarName = \"xApiKey\";",
+									"const cookieName = \"secretKey\";",
+									"const domain = \"postman.galaxy.demo\";",
+									"cookieJar.get(domain, cookieName, (error, secretKey) => {",
+									"  if (error) {",
+									"    console.error(error);",
+									"    pm.variables.set(sessionVarName, \"error\");",
+									"  }",
+									"  if (secretKey) {",
+									"    // encryption",
+									"    const encryptedText = CryptoJS.AES.encrypt('<data-to-encrypt>', secretKey).toString();",
+									"    console.log('encryptedText', encryptedText);",
+									"",
+									"    // decryption",
+									"    console.log('secretKey', secretKey);",
+									"    const xApiKeyEnc = pm.environment.get('x-api-key-enc');",
+									"    console.log('xApiKeyEnc', xApiKeyEnc);",
+									"    const xApiKey = CryptoJS.AES.decrypt(xApiKeyEnc, secretKey).toString(CryptoJS.enc.Utf8);",
+									"    console.log('xApiKey', xApiKey);",
+									"    pm.variables.set(sessionVarName, xApiKey);",
+									"  } else {",
+									"    console.error(\"Cookie is missing\")",
+									"    pm.variables.set(sessionVarName, \"missing\");",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.variables.unset(\"xApiKey\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"type": "text",
+								"value": "{{xApiKey}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"key\": \"value\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{url}}",
+							"protocol": "https",
+							"host": [
+								"{{url}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
